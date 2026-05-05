@@ -20,7 +20,8 @@ async function analisar() {
 Data: ${new Date().toLocaleString()}
 `;
 
-  /* arquivos */
+  console.log('🔍 Iniciando análise dos arquivos e rotas...');
+
   relatorio += `\nArquivos:\n`;
   for (let arq of arquivos) {
     try {
@@ -31,7 +32,6 @@ Data: ${new Date().toLocaleString()}
     }
   }
 
-  /* rotas */
   relatorio += `\nRotas:\n`;
   for (let rota of rotas) {
     try {
@@ -44,9 +44,12 @@ Data: ${new Date().toLocaleString()}
 
   relatorio += `============================\n\n`;
 
-  await fs.appendFile('log.txt', relatorio);
-
-  console.log('✅ Relatório salvo no log.txt');
+  try {
+    await fs.appendFile('log.txt', relatorio);
+    console.log('✅ Relatório salvo no log.txt');
+  } catch (erro) {
+    console.error('❌ Erro ao salvar o relatório:', erro);
+  }
 }
 
 analisar();

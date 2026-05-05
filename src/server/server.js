@@ -4,49 +4,82 @@ import fetch from 'node-fetch';
 import path from 'path';
 
 const app = express();
-
-/* 🔹 BASE DO PROJETO */
 const basePath = process.cwd();
 
-/* 🔹 servir front */
-app.use(express.static(path.join(basePath, '../../public')));
+app.use(express.static(path.join(basePath, 'public')));
 
-/* 🔹 config */
 const config = JSON.parse(
-  await fs.readFile(path.join(basePath, '../../config.json'), 'utf-8')
+  await fs.readFile(path.join(basePath, 'config.json'), 'utf-8')
 );
 
-/* 🔹 /estoque */
 app.get('/estoque', async (req, res) => {
   try {
     const dados = await fs.readFile(
       path.join(basePath, 'src/data/estoque.json'),
       'utf-8'
     );
-    res.json(JSON.parse(dados));
+    const estoque = JSON.parse(dados);
+
+    let html = `
+      <html>
+      <head>
+        <link rel="stylesheet" href="/style.css">
+        <title>Estoque</title>
+      </head>
+      <body>
+        <div class="container">
+          <h1>📦 Estoque</h1>
+          <ul class="cards">
+    `;
+
+    estoque.forEach(item => {
+      html += `<li class="card">${item.nome} - R$ ${item.preco}</li>`;
+    });
+
+    html += `
+          </ul>
+        </div>
+      </body>
+      </html>
+    `;
+
+    res.send(html);
   } catch (e) {
     console.log(e);
-    res.status(500).json({ erro: 'Erro ao ler estoque' });
+    res.status(500).send('<h1>Erro ao carregar o estoque</h1>');
   }
 });
 
-/* 🔹 /log */
 app.get('/log', async (req, res) => {
   try {
     const log = await fs.readFile(
       path.join(basePath, 'log.txt'),
       'utf-8'
     );
-    res.send(`<pre>${log}</pre>`);
+
+    const html = `
+      <html>
+      <head>
+        <link rel="stylesheet" href="/style.css">
+        <title>Logs</title>
+      </head>
+      <body>
+        <div class="container">
+          <h1>📄 Logs</h1>
+          <pre>${log}</pre>
+        </div>
+      </body>
+      </html>
+    `;
+
+    res.send(html);
   } catch (e) {
     console.log(e);
-    res.status(500).send('Erro ao ler log');
+    res.status(500).send('<h1>Erro ao carregar os logs</h1>');
   }
 });
 
-/* 🔹 /adm */
 app.get('/adm', async (req, res) => {
-
   const arquivos = [
     'src/cli/cli.js',
     'src/cli/leitor.js',
@@ -56,39 +89,70 @@ app.get('/adm', async (req, res) => {
 
   const rotas = [
     'http://localhost:3000/estoque',
+    'http://localhost:3000/adm',
     'http://localhost:3000/log'
   ];
 
-  let html = `<h1>🔧 Diagnóstico do Sistema</h1>`;
+  let status = {
+    arquivos: {},
+    rotas: {}
+  };
 
-  /* arquivos */
-  html += `<h2>Arquivos</h2><ul>`;
   for (let arq of arquivos) {
     try {
-      await fs.access(path.join(basePath, arq));
-      html += `<li style="color:green">${arq}: OK</li>`;
+      await fs.access(arq);
+      status.arquivos[arq] = 'OK';
     } catch {
-      html += `<li style="color:red">${arq}: FALTANDO</li>`;
+      status.arquivos[arq] = 'FALTANDO';
     }
   }
-  html += `</ul>`;
 
-  /* rotas */
-  html += `<h2>Rotas</h2><ul>`;
   for (let rota of rotas) {
     try {
-      const resposta = await fetch(rota);
-      html += `<li>${rota}: ${resposta.status}</li>`;
+      const resRota = await fetch(rota);
+      status.rotas[rota] = resRota.status;
     } catch {
-      html += `<li style="color:red">${rota}: ERRO</li>`;
+      status.rotas[rota] = 'ERRO';
     }
   }
-  html += `</ul>`;
+
+  let html = `
+    <html>
+    <head>
+      <link rel="stylesheet" href="/style.css">
+      <title>Painel Administrativo</title>
+    </head>
+    <body>
+      <div class="container">
+        <h1>🔧 Painel Administrativo</h1>
+        <h2>Arquivos</h2>
+        <ul class="cards">
+  `;
+
+  for (const [arquivo, statusArq] of Object.entries(status.arquivos)) {
+    html += `<li class="card">${arquivo}: ${statusArq}</li>`;
+  }
+
+  html += `</ul><h2>Rotas</h2><ul class="cards">`;
+
+  for (const [rota, statusRota] of Object.entries(status.rotas)) {
+    html += `<li class="card">${rota}: ${statusRota}</li>`;
+  }
+
+  html += `
+        </ul>
+      </div>
+    </body>
+    </html>
+  `;
 
   res.send(html);
 });
 
-/* 🔹 start */
+app.get('/', (req, res) => {
+  res.send('Servidor funcionando!');
+});
+
 app.listen(config.porta, () => {
   console.log(`🚀 http://localhost:${config.porta}`);
 });
