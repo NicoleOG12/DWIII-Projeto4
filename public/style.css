@@ -1,0 +1,148 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: radial-gradient(circle at top, #f3e8ff, #f8f6ff);
+  overflow: hidden;
+}
+
+.bg-blur {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: #a259e6;
+  filter: blur(120px);
+  opacity: 0.2;
+  border-radius: 50%;
+  top: -100px;
+  left: -100px;
+  animation: float 6s ease-in-out infinite alternate;
+}
+
+@keyframes float {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(40px);
+  }
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+
+  border-radius: 28px;
+  padding: 50px 35px;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+
+  box-shadow: 0 20px 60px rgba(162, 89, 230, 0.15);
+
+  animation: fadeUp 0.8s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h1 {
+  color: #7b3fe4;
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+}
+
+p {
+  color: #7a6ca8;
+  font-size: 1rem;
+  margin-bottom: 30px;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+
+  padding: 16px;
+  border-radius: 14px;
+
+  background: linear-gradient(135deg, #ffe066, #ffd43b);
+  color: #6b2fcf;
+
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 18px rgba(255, 215, 0, 0.2);
+
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  width: 120%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.4),
+    transparent
+  );
+  top: 0;
+  left: -120%;
+  transition: 0.6s;
+}
+
+.card:hover::before {
+  left: 120%;
+}
+
+.card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(162, 89, 230, 0.25);
+  color: #fff;
+}
+
+.card i {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 500px) {
+  .container {
+    padding: 30px 20px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}
